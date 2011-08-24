@@ -499,17 +499,15 @@ void static array_processer(ArrayType *poly_arr, q3c_poly *qp)
 	/* 1 means full, 0 means partial*/
 	int16 typlen;
 	bool typbyval;
-	char typalign;
-	int i;
-	int poly_nitems;
+	char typalign, *p;
+	int i, poly_nitems;
 	Oid element_type;
-	char *p;
 
 #if PG_VERSION_NUM >= 80300
 	bits8 *bitmap;
 	int bitmask;
 #endif
-	q3c_coord_t *ra= qp->ra, *dec=qp->dec;
+	q3c_coord_t *ra = qp->ra, *dec = qp->dec;
 
 	poly_nitems = ArrayGetNItems(ARR_NDIM(poly_arr), ARR_DIMS(poly_arr));
 	element_type = FLOAT8OID;
@@ -599,33 +597,39 @@ PG_FUNCTION_INFO_V1(pgq3c_poly_query_it);
 Datum pgq3c_poly_query_it(PG_FUNCTION_ARGS)
 {
 	ArrayType *poly_arr = PG_GETARG_ARRAYTYPE_P(0);
-	extern struct q3c_prm hprm;
-
 	int iteration = PG_GETARG_INT32(1); /* iteration */
 	int full_flag = PG_GETARG_INT32(2); /* full_flag */
-	char too_large = 0;
 	/* 1 means full, 0 means partial*/
    /*  !!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!
     * Here the Q3C_NPARTIALS and Q3C_NFULLS is the number of pairs !!! of ranges
 	* So we should have the array with the size twice bigger
 	*/
+
+	extern struct q3c_prm hprm;
+	char too_large = 0;
+
 	static q3c_ipix_t partials[2 * Q3C_NPARTIALS];
 	static q3c_ipix_t fulls[2 * Q3C_NFULLS];
+	static int invocation;
 	q3c_poly qp;
 	q3c_coord_t x[Q3C_MAX_N_POLY_VERTEX];
 	q3c_coord_t y[Q3C_MAX_N_POLY_VERTEX];
 	q3c_coord_t ax[Q3C_MAX_N_POLY_VERTEX];
 	q3c_coord_t ay[Q3C_MAX_N_POLY_VERTEX];
-	qp.x=x;
-	qp.y=y;
-	qp.ax=ax;
-	qp.ay=ay;
+	q3c_coord_t ra[Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t dec[Q3C_MAX_N_POLY_VERTEX];
 
-	static int invocation;
+	qp.x = x;
+	qp.y = y;
+	qp.ax = ax;
+	qp.ay = ay;
+	qp.ra = ra;
+	qp.dec = dec;
+
 	array_processer(poly_arr, &qp);
 
-	fprintf(stderr,"%f %f %f %f",qp.ra[0],qp.dec[0],qp.ra[1],qp.dec[1]);
 	q3c_poly_query(&hprm, &qp, fulls, partials, &too_large);
+
 	if (too_large)
 	{
 		elog(ERROR, "The polygon is too large. Polygons having diameter >~23 degrees are unsupported");
@@ -666,9 +670,23 @@ Datum pgq3c_process_poly(PG_FUNCTION_ARGS)
 	extern struct q3c_prm hprm;
 	char too_large;
 	q3c_poly qp;
+	q3c_coord_t x[Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t y[Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t ax[Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t ay[Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t ra[Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t dec[Q3C_MAX_N_POLY_VERTEX];
+	
 	ArrayType *poly_arr = PG_GETARG_ARRAYTYPE_P(0);
 	bytea *tmp = palloc(VARHDRSZ+sizeof(q3c_pg_poly));
 	q3c_pg_poly *pgpoly = (q3c_pg_poly *)(VARDATA(tmp));
+	qp.x = x;
+	qp.y = y;
+	qp.ax = ax;
+	qp.ay = ay;
+	qp.ra = ra;
+	qp.dec = dec;
+
 	SET_VARSIZE(tmp, VARHDRSZ+sizeof(q3c_pg_poly));//VARDATA
 
 	array_processer(poly_arr, &qp);

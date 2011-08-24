@@ -136,6 +136,7 @@ void q3c_project_poly(q3c_poly *qp, char face_num, char *large_flag)
 	q3c_coord_t *x = qp->x, *y = qp->y, x0, y0;
 	q3c_coord_t tmpval ; 
 	int i, n = qp->n;
+	*large_flag=0;
 	if ((face_num > 0) && (face_num < 5))
 	{
 		face_num--; /* Just computation trick */
@@ -350,7 +351,7 @@ void prepare_check_sphere_point_in_poly(struct q3c_prm *hprm,
 										char * too_large)
 {
 	q3c_coord_t xmin,xmax,ymin, ymax;
-	static char faces[6], multi_flag;
+	char multi_flag;
 	q3c_ipix_t ipix;
 	q3c_coord_t points[4];
 	char face_num, face_num0, large_flag;
@@ -359,15 +360,19 @@ void prepare_check_sphere_point_in_poly(struct q3c_prm *hprm,
 	q3c_coord_t dec0 = qp0->dec[0];
 	q3c_coord_t x0,y0;
 	q3c_poly tmpqp;
+	char *faces = qpp->faces;
 	*too_large=0;
-	tmpqp.ax=qpp->ax[0];
-	tmpqp.ay=qpp->ay[0];
-	tmpqp.x=qpp->x[0];
-	tmpqp.y=qpp->y[0];
-	tmpqp.ra=qp0->ra;
-	tmpqp.dec=qp0->dec;
+
+	tmpqp.ax = qpp->ax[0];
+	tmpqp.ay = qpp->ay[0];
+	tmpqp.x = qpp->x[0];
+	tmpqp.y = qpp->y[0];
+	tmpqp.ra = qp0->ra;
+	tmpqp.dec = qp0->dec;
 	tmpqp.n = qp0->n;
+
 	qpp->n = qp0->n;
+
 	q3c_ang2ipix_xy(hprm, ra0, dec0, &face_num, &ipix, &x0, &y0);
 	faces[0] = face_num;
 		
