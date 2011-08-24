@@ -99,7 +99,7 @@ CREATE OR REPLACE FUNCTION q3c_poly_query_it(double precision[], integer,
         LANGUAGE C IMMUTABLE STRICT;
 
 CREATE OR REPLACE FUNCTION q3c_in_poly(double precision, double precision,
-				       double precision[])
+				       bytea)
         RETURNS boolean
         AS 'MODULE_PATHNAME', 'pgq3c_in_poly'
         LANGUAGE C IMMUTABLE STRICT;
@@ -601,6 +601,12 @@ CREATE OR REPLACE FUNCTION q3c_join(double precision, double precision,
 -- $6 radius
 
 
+CREATE OR REPLACE FUNCTION q3c_process_poly(
+                double precision[])
+        RETURNS bytea
+        AS 'MODULE_PATHNAME', 'pgq3c_process_poly'
+        LANGUAGE C IMMUTABLE STRICT;
+
 
 CREATE OR REPLACE FUNCTION q3c_poly_query(
                 double precision, double precision,
@@ -697,7 +703,7 @@ CREATE OR REPLACE FUNCTION q3c_poly_query(
 (q3c_ang2ipix($1,$2)>=q3c_poly_query_it($3,86,0) AND q3c_ang2ipix($1,$2)<q3c_poly_query_it($3,87,0)) OR
 (q3c_ang2ipix($1,$2)>=q3c_poly_query_it($3,88,0) AND q3c_ang2ipix($1,$2)<q3c_poly_query_it($3,89,0)) 
 )
-AND  q3c_in_poly($1,$2,$3);
+AND  q3c_in_poly($1,$2,q3c_process_poly($3));
 ' LANGUAGE SQL IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION q3c_poly_query(
@@ -795,7 +801,7 @@ CREATE OR REPLACE FUNCTION q3c_poly_query(
 (q3c_ang2ipix($1,$2)>=q3c_poly_query_it($3,86,0) AND q3c_ang2ipix($1,$2)<q3c_poly_query_it($3,87,0)) OR
 (q3c_ang2ipix($1,$2)>=q3c_poly_query_it($3,88,0) AND q3c_ang2ipix($1,$2)<q3c_poly_query_it($3,89,0)) 
 )
-AND  q3c_in_poly($1,$2,$3);
+AND  q3c_in_poly($1,$2,q3c_process_poly($3));
 ' LANGUAGE SQL IMMUTABLE;
 
 

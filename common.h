@@ -225,6 +225,17 @@ typedef struct
 	q3c_coord_t PA;
 } q3c_ellipse_region;
 
+typedef struct
+{
+	q3c_coord_t x[3][Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t y[3][Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t ax[3][Q3C_MAX_N_POLY_VERTEX];
+	q3c_coord_t ay[3][Q3C_MAX_N_POLY_VERTEX];
+	char faces[6];
+	int n;
+} q3c_pg_poly;
+
+
 typedef enum {Q3C_CIRCLE, Q3C_POLYGON, Q3C_ELLIPSE} q3c_region;
 
 void init_q3c(struct q3c_prm *, q3c_ipix_t);
@@ -359,11 +370,13 @@ void q3c_poly_query(struct q3c_prm *hprm, q3c_poly *qp,
 					q3c_ipix_t *out_ipix_arr_partials,
                     char *too_large);
 
-int q3c_check_sphere_point_in_poly(struct q3c_prm *hprm, int n,
-								   q3c_coord_t in_ra[], q3c_coord_t in_dec[],
+int q3c_check_sphere_point_in_poly(struct q3c_prm *hprm,
+								   q3c_pg_poly *qpp,
 								   q3c_coord_t ra0, q3c_coord_t dec0,
-								   char *too_large,
-								   int invocation);
+								   char *too_large);
+
+void prepare_check_sphere_point_in_poly(struct q3c_prm *hprm, q3c_pg_poly *p,
+            q3c_poly *p1, char *too_large);
 
 inline char q3c_get_region_facenum(q3c_region region, void *data);
 
