@@ -1,5 +1,5 @@
 MODULE_big=q3c
-OBJS=q3c.o dump.o q3cube.o q3c_poly.o
+OBJS=q3c.o dump.o q3cube.o q3c_poly.o q3c_utils.o
 DATA_built=q3c.sql
 DOCS=README.q3c
 
